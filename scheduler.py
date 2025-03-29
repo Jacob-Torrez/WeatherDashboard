@@ -1,31 +1,75 @@
-import api, schedule, database, requests, config
+import weatherAPI
+import schedule
+import database
+import requests
+import config
+import time
 
 class Scheduler:
-    def __init__ (self):
-        self.wapi = api.WeatherAPI()
-        self.dbManager = database.DatabaseManager()
-        self.OSMURL = config.OSM_URL
+    def __init__(self):
+        self.weather_api = weatherAPI.WeatherAPI()
+        self.db_manager = database.DatabaseManager()
+        self.base_url = config.OSM_URL
 
     def addJob(self, location: str):
-        payload = {"q": location, "format": "json", "limit": 1, "addressdetails": 1}
-        headers = {"User-Agent": config.USER_AGENT}
+        try:
+            payload = {
+                'q': location, 
+                'format': 'json', 
+                'limit': 1, 
+                'addressdetails': 1
+            }
 
-        request = requests.get(self.OSMURL, params=payload, headers=headers)
+            headers = {
+                'User-Agent': config.USER_AGENT
+            }
 
-        if (request.status_code != 200):
+            response = requests.get(
+                self.base_url, 
+                params=payload, 
+                headers=headers
+            )
+
+            if (response.status_code == 200):
+                locationData = response.json()[0]
+                return self.db_manager.addLocation(locationData['address']['country'], locationData['address']['city'], locationData['lon'], locationData['lat'])
+            else:
+                return False
+
+        except:
             return False
-        else:
-            response = request.json()
-            return self.dbManager.addLocation(response[0]['address']['country'], response[0]['address']['city'], response[0]['lon'], response[0]['lat'])
+
         
-    def removeJob(self, locationID : int): # check if location exists
-        return self.dbManager.removeLocation(locationID)
+        
+    def removeJob(self, locationID : int):
+        return self.db_manager.removeLocation(locationID)
     
-    def getJobs(self):
-        pass
+    def getJobsMetadata(self):
+        return self.db_manager.getLocationsMetadata()
+    
+    def getJobsCoordinates(self):
+        return self.db_manager.getLocationsCoordinates()
 
     def fetchDailyWeather(self):
-        pass
+        locations = self.getJobsCoordinates()
 
-scheduler = Scheduler()
-print(scheduler.removeJob(1))
+        if not locations:
+            return False
+
+        else:
+            for location in locations:
+                response = self.weather_api.requestWeather(location[1], location[2], 'alerts,minutely,hourly,current')['daily']
+                self.db_manager.addWeather(location[0], response['dt'], response['temp']['max'], response['temp']['min'], response['pop'], response['humidity'], response['pressure'], response['uvi'], response['moon_phase'])
+
+            return True
+
+#def main():
+    #scheduler = Scheduler()
+    #schedule.every(24).hours.do(scheduler.fetchDailyWeather())
+
+    #while True:
+        #schedule.run_pending()
+        #time.sleep(3600)
+
+#if __name__ == "__main__":
+    #main()
