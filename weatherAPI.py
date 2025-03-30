@@ -8,21 +8,23 @@ class WeatherAPI:
         self.timeout = 20
         
     def requestWeather(self, lon : float, lat : float, excludes : str):
-        payload = {
-            'lat': lat, 
-            'lon': lon, 
-            'appid': self.api_key, 
-            'exclude': excludes, 
-            'units': 'imperial'
-        }
+        try:
+            payload = {
+                'lat': lat, 
+                'lon': lon, 
+                'appid': self.api_key, 
+                'exclude': excludes, 
+                'units': 'imperial'
+            }
 
-        response = requests.get(
-            self.base_url,
-            params=payload,
-            timeout=self.timeout
-        )
+            response = requests.get(
+                self.base_url,
+                params=payload,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
 
-        if (response.status_code == 200):
-            return response.json()[0]
-        else:
+            return response.json()
+        
+        except:
             return False

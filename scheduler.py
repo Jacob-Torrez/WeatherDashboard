@@ -29,17 +29,19 @@ class Scheduler:
                 params=payload, 
                 headers=headers
             )
+            response.raise_for_status()
 
-            if (response.status_code == 200):
-                locationData = response.json()[0]
-                return self.db_manager.addLocation(locationData['address']['country'], locationData['address']['city'], locationData['lon'], locationData['lat'])
-            else:
-                return False
+            locationData = response.json()[0]
+
+            return self.db_manager.addLocation(
+                locationData['address']['country'],
+                locationData['address']['city'],
+                locationData['lon'],
+                locationData['lat']
+            )
 
         except:
             return False
-
-        
         
     def removeJob(self, locationID : int):
         return self.db_manager.removeLocation(locationID)
@@ -58,10 +60,14 @@ class Scheduler:
 
         else:
             for location in locations:
-                response = self.weather_api.requestWeather(location[1], location[2], 'alerts,minutely,hourly,current')['daily']
-                self.db_manager.addWeather(location[0], response['dt'], response['temp']['max'], response['temp']['min'], response['pop'], response['humidity'], response['pressure'], response['uvi'], response['moon_phase'])
+                response = self.weather_api.requestWeather(location[1], location[2], 'alerts,minutely,hourly,current')['daily'][0]
+                self.db_manager.addWeather(location[0], response['dt'], response['temp']['max'], response['temp']['min'], response['pop'], response['humidity'], response['pressure'], response['uvi'])
 
             return True
+        
+    def getJobData(self, locationID : int):
+        return self.db_manager.getWeatherData(locationID)
+        
 
 #def main():
     #scheduler = Scheduler()
