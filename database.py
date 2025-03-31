@@ -1,9 +1,12 @@
 import sqlite3
-import config
+from dotenv import load_dotenv
+import os
 
 class DatabaseManager:
     def __init__(self):
-        self.con = sqlite3.connect(config.DATABASE_FILE)
+        load_dotenv()
+
+        self.con = sqlite3.connect(os.getenv("DATABASE_FILE"))
         self.cur = self.con.cursor()
 
     def addLocation(self, country : str, city : str, long : float, lat : float):

@@ -1,11 +1,15 @@
 import requests
-import config
+from dotenv import load_dotenv
+import os
 
 class APICaller:
     def __init__(self):
-        self.OWM_key = config.OWM_KEY
-        self.OWM_URL = config.OWM_URL
-        self.OSM_URL = config.OSM_URL
+        load_dotenv()
+
+        self.OWM_KEY = os.getenv("OWM_KEY")
+        self.OWM_URL = os.getenv("OWM_URL")
+        self.OSM_URL = os.getenv("OSM_URL")
+        self.USER_AGENT = os.getenv("USER_AGENT")
         self.timeout = 20
         
     def requestWeather(self, lon : float, lat : float, excludes : str):
@@ -40,7 +44,7 @@ class APICaller:
             }
 
             headers = {
-                'User-Agent': config.USER_AGENT
+                'User-Agent': self.USER_AGENT
             }
 
             response = requests.get(

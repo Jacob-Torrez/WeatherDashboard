@@ -1,7 +1,6 @@
 import api
 import schedule
 import database
-import requests
 import time
 
 class Scheduler:
