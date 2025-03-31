@@ -6,10 +6,7 @@ class Visualizer:
     def __init__(self):
         pass
 
-    def plotOnDemandData(self):
-        pass
-
-    def plotJobData(self, data, yLabel : str):
+    def plotData(self, data, yLabel : str, dateFormat : str):
         fig, ax = plt.subplots()
 
         timestamps, values = zip(*data)
@@ -18,8 +15,8 @@ class Visualizer:
 
         ax.plot(dates, values, marker='o', linestyle='-')
 
+        ax.xaxis.set_major_formatter(mdates.DateFormatter(dateFormat))
         ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%m/%y'))
         plt.xticks(rotation=45)
 
         ax.set_xlabel("Date")

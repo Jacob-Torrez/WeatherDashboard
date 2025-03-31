@@ -1,10 +1,11 @@
 import scheduler
-import weatherAPI
+import api
 import visualization
 
 class Interface:
     def __init__ (self):
         self.job_scheduler = scheduler.Scheduler()
+        self.api = api.APICaller()
         self.visualizer = visualization.Visualizer()
 
     def run(self):
@@ -31,27 +32,96 @@ class Interface:
 
     def onDemandMenu(self):
         while True:
-            print("Options: [1] Minutely [2] Hourly [3] Daily [4] Exit")
-            choice = input()
+            print("Please enter location: (q to quit)")
+            location = input()
 
-            if choice == '4':
+            if location == 'q':
                 break
 
-            elif choice != '1' and choice != '2' and choice != '3':
-                print("Invalid input. Please input again")
+            locationData = self.api.requestCoordinates(location)
+
+            if not locationData:
+                "Invalid location. Please try again"
                 continue
 
-            print("Please enter the location:")
-            city = input()
+            weatherData = self.api.requestWeather(locationData['lon'], locationData['lat'], 'alerts,current')
 
-            if choice == '1':
-                print("Retrieving minutely forecast")
+            while True:
+                print("Options: [1] Minutely [2] Hourly [3] Daily [4] Exit")
+                choice = input()
 
-            elif choice == '2':
-                print("Retrieving hourly forecast")
+                if choice == '4':
+                    break
 
-            elif choice == '3':
-                print("Retrieving daily forecast")
+                elif choice != '1' and choice != '2' and choice != '3':
+                    print("Invalid input. Please input again")
+                    continue
+
+                if choice == '1':
+                    data = [(d['dt'], d['precipitation']) for d in weatherData['minutely']]
+                    self.visualizer.plotData(data, "Precipitation (mm/h)", '%H:%M')
+
+                elif choice == '2':
+                    fields = {
+                        '1': ("Temperature (F)", 'temp'),
+                        '2': ("Pressure (hPa)", 'pressure'),
+                        '3': ("Humidity (%)", 'humidity'),
+                        '4': ("UV Index", 'uvi'),
+                        '5': ("Wind speed (mi/h)", 'wind_speed'),
+                        '6': ("Proabibility of Precipitation (%)", 'pop')
+                    }
+                    print("Plot options:")
+                    print("[1] Temperature")
+                    print("[2] Pressure")
+                    print("[3] Humidity")
+                    print("[4] UV Index")
+                    print("[5] Wind Speed")
+                    print("[6] Probability of Precipitation")     
+                    print("[7] Exit")         
+                    choice = input()
+
+                    if choice == '7':
+                        continue
+
+                    if choice not in ['1', '2', '3', '4', '5', '6']:
+                        print("Invald choice. Try again")
+                        continue
+
+                    data = [(d['dt'], d[fields[choice][1]]) for d in weatherData['hourly']]
+                    self.visualizer.plotData(data, fields[choice][0], '%m/%m/%y %H:%M')
+
+                elif choice == '3':
+                    fields = {
+                        '1': ("Max Temperature (F)", ('temp', 'max')),
+                        '2': ("Min Temperature (F)", ('temp', 'min')),
+                        '3': ("Pressure (hPa)", 'pressure'),
+                        '4': ("Humidity (%)", 'humidity'),
+                        '5': ("Wind speed (mi/h)", 'wind_speed'),
+                        '6': ("Proabibility of Precipitation (%)", 'pop'),
+                        '7': ("Max UV Index", 'uvi')
+                    }
+                    print("Plot options:")
+                    print("[1] Max Temp")
+                    print("[2] Min Temp")
+                    print("[3] Pressure")
+                    print("[4] Humidity")
+                    print("[5] Wind Speed")
+                    print("[6] Probability of Precipitation")    
+                    print("[7] Max UV Index") 
+                    print("[8] Exit")
+                    choice = input()
+
+                    if choice == '8':
+                        continue
+
+                    if choice not in ['1', '2', '3', '4', '5', '6', '7']:
+                        print("Invalid choice. Try again")
+                        continue
+
+                    data = [(d['dt'], d[fields[choice][1][0]][fields[choice][1][1]] 
+                            if isinstance(fields[choice][1], tuple) else d[fields[choice][1]]) 
+                            for d in weatherData['daily']]
+                    self.visualizer.plotData(data, fields[choice][0], '%m/%d/%y')
 
     def schedulerMenu(self):
         while True:
@@ -105,7 +175,6 @@ class Interface:
                 break
 
             weatherData = self.job_scheduler.getJobData(locationID)
-            print(weatherData)
 
             if (not weatherData):
                 print("Invalid ID or no data available. Please try again")
@@ -135,7 +204,7 @@ class Interface:
                     yLabel, dataIndex = fields[choice]
                     
                     data = [(d[1], d[dataIndex]) for d in weatherData]
-                    self.visualizer.plotJobData(data, yLabel)
+                    self.visualizer.plotData(data, yLabel, '%m/%d/%y')
 
                 elif (choice == '7'):
                     break

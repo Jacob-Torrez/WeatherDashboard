@@ -1,46 +1,26 @@
-import weatherAPI
+import api
 import schedule
 import database
 import requests
-import config
 import time
 
 class Scheduler:
     def __init__(self):
-        self.weather_api = weatherAPI.WeatherAPI()
+        self.api = api.APICaller()
         self.db_manager = database.DatabaseManager()
-        self.base_url = config.OSM_URL
 
     def addJob(self, location: str):
-        try:
-            payload = {
-                'q': location, 
-                'format': 'json', 
-                'limit': 1, 
-                'addressdetails': 1
-            }
+        locationData = self.api.requestCoordinates(location)
 
-            headers = {
-                'User-Agent': config.USER_AGENT
-            }
-
-            response = requests.get(
-                self.base_url, 
-                params=payload, 
-                headers=headers
-            )
-            response.raise_for_status()
-
-            locationData = response.json()[0]
-
+        if (locationData):
             return self.db_manager.addLocation(
                 locationData['address']['country'],
                 locationData['address']['city'],
                 locationData['lon'],
                 locationData['lat']
             )
-
-        except:
+        
+        else:
             return False
         
     def removeJob(self, locationID : int):
@@ -60,7 +40,7 @@ class Scheduler:
 
         else:
             for location in locations:
-                response = self.weather_api.requestWeather(location[1], location[2], 'alerts,minutely,hourly,current')['daily'][0]
+                response = self.api.requestWeather(location[1], location[2], 'alerts,minutely,hourly,current')['daily'][0]
                 self.db_manager.addWeather(location[0], response['dt'], response['temp']['max'], response['temp']['min'], response['pop'], response['humidity'], response['pressure'], response['uvi'])
 
             return True
