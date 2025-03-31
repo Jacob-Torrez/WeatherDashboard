@@ -49,13 +49,13 @@ class Scheduler:
         return self.db_manager.getWeatherData(locationID)
         
 
-#def main():
-    #scheduler = Scheduler()
-    #schedule.every(24).hours.do(scheduler.fetchDailyWeather())
+def main():
+    scheduler = Scheduler()
+    schedule.every(24).hours.do(scheduler.fetchDailyWeather())
 
-    #while True:
-        #schedule.run_pending()
-        #time.sleep(3600)
+    while True:
+        schedule.run_pending()
+        time.sleep(3600)
 
-#if __name__ == "__main__":
-    #main()
+if __name__ == "__main__":
+    main()
