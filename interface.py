@@ -68,7 +68,7 @@ class Interface:
                         '3': ("Humidity (%)", 'humidity'),
                         '4': ("UV Index", 'uvi'),
                         '5': ("Wind speed (mi/h)", 'wind_speed'),
-                        '6': ("Proabibility of Precipitation (%)", 'pop')
+                        '6': ("Probability of Precipitation (%)", 'pop')
                     }
                     print("Plot options:")
                     print("[1] Temperature")
@@ -84,11 +84,11 @@ class Interface:
                         continue
 
                     if choice not in ['1', '2', '3', '4', '5', '6']:
-                        print("Invald choice. Try again")
+                        print("Invalid choice. Try again")
                         continue
 
                     data = [(d['dt'], d[fields[choice][1]]) for d in weatherData['hourly']]
-                    self.visualizer.plotData(data, fields[choice][0], '%m/%m/%y %H:%M')
+                    self.visualizer.plotData(data, fields[choice][0], '%m/%d/%y %H:%M')
 
                 elif choice == '3':
                     fields = {
@@ -97,7 +97,7 @@ class Interface:
                         '3': ("Pressure (hPa)", 'pressure'),
                         '4': ("Humidity (%)", 'humidity'),
                         '5': ("Wind speed (mi/h)", 'wind_speed'),
-                        '6': ("Proabibility of Precipitation (%)", 'pop'),
+                        '6': ("Probability of Precipitation (%)", 'pop'),
                         '7': ("Max UV Index", 'uvi')
                     }
                     print("Plot options:")

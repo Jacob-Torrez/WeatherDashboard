@@ -17,7 +17,7 @@ class APICaller:
             payload = {
                 'lat': lat, 
                 'lon': lon, 
-                'appid': self.OWM_key, 
+                'appid': self.OWM_KEY, 
                 'exclude': excludes, 
                 'units': 'imperial'
             }

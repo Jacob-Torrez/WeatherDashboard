@@ -50,7 +50,7 @@ class Scheduler:
 
 def main():
     scheduler = Scheduler()
-    schedule.every(24).hours.do(scheduler.fetchDailyWeather())
+    schedule.every(24).hours.do(scheduler.fetchDailyWeather)
 
     while True:
         schedule.run_pending()
