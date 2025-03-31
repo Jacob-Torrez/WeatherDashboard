@@ -5,7 +5,7 @@ import time
 
 class Scheduler:
     def __init__(self):
-        self.api = api.APICaller()
+        self.api = api.APIClient()
         self.db_manager = database.DatabaseManager()
 
     def addJob(self, location: str):

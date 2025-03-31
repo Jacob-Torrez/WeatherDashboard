@@ -5,7 +5,7 @@ import visualization
 class Interface:
     def __init__ (self):
         self.job_scheduler = scheduler.Scheduler()
-        self.api = api.APICaller()
+        self.api = api.APIClient()
         self.visualizer = visualization.Visualizer()
 
     def run(self):

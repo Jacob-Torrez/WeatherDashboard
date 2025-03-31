@@ -2,14 +2,14 @@ import requests
 from dotenv import load_dotenv
 import os
 
-class APICaller:
+class APIClient:
     def __init__(self):
         load_dotenv()
 
-        self.OWM_KEY = os.getenv("OWM_KEY")
-        self.OWM_URL = os.getenv("OWM_URL")
-        self.OSM_URL = os.getenv("OSM_URL")
-        self.USER_AGENT = os.getenv("USER_AGENT")
+        self.owm_key = os.getenv("OWM_KEY")
+        self.owm_url = os.getenv("OWM_URL")
+        self.osm_url = os.getenv("OSM_URL")
+        self.user_agent = os.getenv("USER_AGENT")
         self.timeout = 20
         
     def requestWeather(self, lon : float, lat : float, excludes : str):
@@ -17,13 +17,13 @@ class APICaller:
             payload = {
                 'lat': lat, 
                 'lon': lon, 
-                'appid': self.OWM_KEY, 
+                'appid': self.owm_key, 
                 'exclude': excludes, 
                 'units': 'imperial'
             }
 
             response = requests.get(
-                self.OWM_URL,
+                self.owm_url,
                 params=payload,
                 timeout=self.timeout
             )
@@ -44,11 +44,11 @@ class APICaller:
             }
 
             headers = {
-                'User-Agent': self.USER_AGENT
+                'User-Agent': self.user_agent
             }
 
             response = requests.get(
-                self.OSM_URL, 
+                self.osm_url, 
                 params=payload, 
                 headers=headers
             )
